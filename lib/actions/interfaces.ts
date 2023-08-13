@@ -3,6 +3,11 @@ export enum Gender {
     FEMALE ='female'
 }
 
+export enum Status {
+    ACTIVE = 'active',
+    INACTIVE = 'inactive'
+}
+
 export interface IParams {
     page: number,
     per_page: number
@@ -12,7 +17,8 @@ export interface IUser {
     id: number,
     name: string,
     email: string,
-    gender: Gender
+    gender: Gender,
+    status: Status
 }
 
 export interface IPost {

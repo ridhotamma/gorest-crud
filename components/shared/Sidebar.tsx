@@ -2,29 +2,28 @@ import { useSidebar } from "@/contexts/SidebarContext";
 
 import navigationMenus, { IMenu } from "@/constants/navigationMenus";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { usePathname } from 'next/navigation'
+import { useEffect } from "react";
 
 export default function Sidebar() {
   const { visible, setVisible } = useSidebar();
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
 
   const handleToggleSidebar = () => {
     setVisible((prev) => !prev);
   };
 
-  const handleClickMenu = (index: number) => {
-    setCurrentIndex(index);
-    localStorage.setItem("sidebarIndex", String(index));
-    handleToggleSidebar();
-  };
+  const validateMatchedRoute = (menu: IMenu) => {
+    const path = usePathname()
+    return path === menu.path
+  }
 
   useEffect(() => {
-    const storedIndex = localStorage.getItem("sidebarIndex");
-
-    if (storedIndex !== null) {
-      setCurrentIndex(parseInt(storedIndex, 10));
+    if (visible) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
     }
-  }, []);
+  }, [visible]);
 
   return (
     <div
@@ -34,11 +33,11 @@ export default function Sidebar() {
     >
       <div
         onClick={handleToggleSidebar}
-        className={`z-[98] opacity-50 w-full h-screen absolute top-0 left-0`}
+        className={`z-[98] opacity-60 w-full h-screen absolute top-0 left-0`}
       ></div>
 
       <div
-        className={`w-[400px] shadow-2xl fixed right-0 z-[99] h-full p-4 bg-white flex flex-col`}
+        className={`w-screen md:w-[400px] shadow-2xl fixed right-0 z-[99] h-full p-4 bg-white flex flex-col`}
       >
         <div className="pb-6 flex justify-between items-center">
           <p>
@@ -54,12 +53,12 @@ export default function Sidebar() {
         <ul>
           {navigationMenus.map((menu, index) => {
             return (
-              <li onClick={() => handleClickMenu(index)} key={index}>
+              <li onClick={handleToggleSidebar} key={index}>
                 <Link
                   className={`${
-                    currentIndex === index ? "bg-slate-600 text-white" : ""
+                    validateMatchedRoute(menu) ? "bg-slate-600 text-white" : ""
                   } rounded-xl p-4 cursor-pointer flex gap-4 mb-2`}
-                  href={menu.route}
+                  href={menu.path}
                 >
                   <span className="material-icons">{menu.icon}</span>
                   <p>{menu.label}</p>

@@ -13,7 +13,7 @@ export default function Navbar() {
   };
 
   return (
-    <div className="sticky z-[95] top-0 text-white w-full h-[100px] bg-blue-700 px-4">
+    <div className="sticky z-[95] top-0 text-white w-full h-[100px] bg-blue-700 px-0 md:px-4">
       <div className="w-full h-full flex justify-between items-center">
         <Link href={"/"} className="p-4 flex gap-4 items-center">
           <Image

@@ -22,7 +22,11 @@ interface SuccessData<T> {
     data: T;
 }
 
-async function service<T>({ url, method, params, data }: ServiceOptions): Promise<SuccessData<T>> {
+async function service<T>({ url, method, params, data }: ServiceOptions): Promise<SuccessData<T | null>> {
+    if (!['GET', 'POST', 'PUT', 'DELETE'].includes(method)) {
+        throw new Error(`Invalid HTTP method: ${method}`);
+    }
+
     const options: RequestInit = {
         method,
         headers: {
@@ -43,6 +47,7 @@ async function service<T>({ url, method, params, data }: ServiceOptions): Promis
 
     try {
         const response = await fetch(requestUrl, options);
+
         if (!response.ok) {
             const errorData: ErrorData = {
                 status: 'error',
@@ -52,7 +57,21 @@ async function service<T>({ url, method, params, data }: ServiceOptions): Promis
             };
             throw errorData;
         }
+
+        // handle response untuk delete, karena tidak return data 😭
+        if (method === 'DELETE') {
+            const successData: SuccessData<null> = {
+                status: 'success',
+                statusCode: response.status,
+                message: 'Request successful',
+                ok: true,
+                data: null,
+            };
+            return successData;
+        }
+
         const responseData: T = await response.json();
+
         const successData: SuccessData<T> = {
             status: 'success',
             statusCode: response.status,
@@ -62,7 +81,6 @@ async function service<T>({ url, method, params, data }: ServiceOptions): Promis
         };
         return successData;
     } catch (error) {
-        console.error('HTTP request error:', error);
         throw error;
     }
 }

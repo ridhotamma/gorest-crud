@@ -10,6 +10,13 @@ function getPaginatedUsers(params: IParams) {
   });
 }
 
+function getUserDetailById(id: number) {
+  return service({
+    url: `/users/${id}`,
+    method: 'GET'
+  })
+}
+
 function createUser(data: IUser) {
   return service({
     url: "/users",
@@ -18,7 +25,7 @@ function createUser(data: IUser) {
   });
 }
 
-function updateUser(userId: number, data: IUser) {
+function updateUser(userId: number, data: Partial<IUser>) {
   return service({
     url: `/users/${userId}`,
     method: "PUT",
@@ -54,4 +61,5 @@ export {
   getUserTodos,
   updateUser,
   deleteUser,
+  getUserDetailById
 };

@@ -1,9 +1,9 @@
 export interface IHeader {
-  text?: string;
-  value?: string;
+  text: string;
+  value: string;
   align?: string;
-  rowStyles?: string;
-  rowCallback?: () => void;
+  rowStyles?: (data: any) => any;
+  rowClick?: (data: any) => void;
   sortable?: boolean;
   width?: number;
 }

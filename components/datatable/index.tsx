@@ -40,7 +40,12 @@ const DataTable = ({ headers, dataSource }: DataTableProps) => {
                           item.width ? item.width : 100
                         }px] text-gray-900 font-light px-6 py-4`}
                       >
-                        <span onClick={item.rowCallback} className={`${item.rowStyles}`}>
+                        <span
+                          onClick={() => item.rowClick && item.rowClick(data)}
+                          className={`${
+                            item.rowStyles && item.rowStyles(data)
+                          }`}
+                        >
                           {data[item.value!]}
                         </span>
                       </td>

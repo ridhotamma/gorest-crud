@@ -1,25 +1,25 @@
 export default [
     {
         label: 'Home',
-        route: '/',
+        path: '/',
         icon: 'home'
     },
     {
         label: 'User Management',
-        route: '/users',
+        path: '/users',
         icon: 'account_circle'
     },
 
     {
         label: 'Blog Management',
-        route: '/blogs',
+        path: '/blogs',
         icon: 'list_alt'
     },
 ]
 
 interface IMenu {
     label: string
-    route: string
+    path: string
     icon: string
 }
 

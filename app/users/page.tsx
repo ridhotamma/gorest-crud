@@ -1,33 +1,155 @@
 "use client";
 
-import { getPaginatedUsers } from "@/lib/actions";
-import { IParams, IUser } from "@/lib/actions/interfaces";
+import { getPaginatedUsers, createUser, getUserDetailById, updateUser, deleteUser } from "@/lib/actions";
+import { IParams, IUser, Status } from "@/lib/actions/interfaces";
 import { useEffect, useState } from "react";
 
 import DataTable from "@/components/datatable";
 import SkeletonLoader from "@/components/skeletons";
 import Pagination from "@/components/pagination";
+import Modal from "@/components/modal";
+import UserForm from "@/components/forms/userForm";
+import UserUpdateForm from "@/components/forms/userUpdateForm";
+
+import { IHeader } from "@/components/datatable/interface";
+import { useToast } from "@/components/toast";
 
 export default function Users() {
   const [params, setParams] = useState<IParams>({ page: 1, per_page: 10 });
   const [dataSource, setDataSource] = useState<IUser[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [userDetailLoading, setUserDetailLoading] = useState<boolean>(false);
+  const [userCreateLoading, setUserCreateLoading] = useState<boolean>(false);
   const [searchText, setSearchText] = useState<string>("");
+  const [createUserModalOpen, setCreateUserModalOpen] = useState<boolean>(false);
+  const [updateUserModalOpen, setUpdateUserModalOpen] = useState<boolean>(false);
+  const [userDetail, setUserDetail] = useState<Partial<IUser>>({});
 
-  const getDataSource = async () => {
+  const toast = useToast()
+
+  const getDataSource = async (callback?: () => void) => {
     setLoading(true);
     try {
       const response = await getPaginatedUsers(params);
       const { ok, data } = response;
-      
-      if (ok) setDataSource(data as IUser[]);
 
+      if (ok) setDataSource(data as IUser[]);
     } catch (error) {
       console.error({ error });
     } finally {
       setLoading(false);
+      if (callback) callback();
     }
   };
+
+  const getUserDetail = async (id: number) => {
+    setUserDetailLoading(true);
+
+    try {
+      const response = await getUserDetailById(id);
+      const { ok, data } = response;
+
+      if (ok) {
+        setUserDetail(data as IUser);
+        setUpdateUserModalOpen(true);
+      } 
+
+    } catch (error: any) {
+      
+      toast.trigger({
+        type: 'danger', 
+        message: error.message
+      })
+
+    } finally {
+      setUserDetailLoading(false);
+    }
+  };
+
+  const handleCreateUser = async (newUser: IUser) => {
+    setUserCreateLoading(true) 
+    
+    try {
+      const response = await createUser(newUser)
+      const { ok, data } = response
+
+      if (ok) {
+        setDataSource(prevDataSource => [data as any, ...prevDataSource]);
+        toast.trigger({
+          type: 'success',
+          message: 'User Created Succesfully'
+        })
+      }
+
+    } catch (error: any) {
+      toast.trigger({
+        type: 'danger',
+        message: error.message
+      })
+    } finally {
+      setUserCreateLoading(false)
+      handleToggleCreateUserModal()
+    }
+  }
+
+  const handleDeleteUser = async (userId: number) => {
+    setUserDetailLoading(true)
+    try {
+      const response = await deleteUser(userId)
+
+      const { ok, message } = response
+
+      if (ok) {
+
+        setDataSource(prevDataSource => prevDataSource.filter(user => user.id !== userId ));
+
+        toast.trigger({
+          type: 'success',
+          message: message
+        })
+      }
+
+    } catch (error: any) {
+      toast.trigger({
+        type: 'danger',
+        message: error.message
+      })
+
+    } finally {
+      setUserDetailLoading(false)
+      handleToggleUpdateUserModal()
+    }
+  }
+
+  const handleUpdateUser = async (userId: number, payload: Partial<IUser>) => {
+    setUserDetailLoading(true) 
+    try {
+      const response = await updateUser(userId, payload)
+      const { ok, data, message } = response
+
+      if (ok) {
+
+        setDataSource(prevDataSource => prevDataSource.map(user => 
+          user.id === userId ? { ...user, ...data as any } : user
+        ));
+
+        toast.trigger({
+          type: 'success',
+          message: message
+        })
+      }
+
+      
+    } catch (error: any) {
+      toast.trigger({
+        type: 'danger',
+        message: error.message
+      })
+    } finally {
+      setUserDetailLoading(false)
+      handleToggleUpdateUserModal()
+    }
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value);
@@ -37,43 +159,64 @@ export default function Users() {
   };
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      setDataSource((prev) =>
-        prev.filter((item) =>
-          item.name.toLowerCase().includes(searchText.toLowerCase())
-        )
-      );
+    if (searchText && e.key === "Enter") {
+      getDataSource(() => {
+        setDataSource((prev) =>
+          prev.filter((item) =>
+            item.name.toLowerCase().includes(searchText.toLowerCase())
+          )
+        );
+      });
     }
+  };
+
+  const handleToggleCreateUserModal = () => {
+    setCreateUserModalOpen((prev) => !prev);
+  };
+
+  const handleToggleUpdateUserModal = () => {
+    setUpdateUserModalOpen((prev) => !prev);
   };
 
   useEffect(() => {
     getDataSource();
   }, [params.page]);
 
-  const headers = [
+  const headers: IHeader[] = [
     { text: "ID", value: "id" },
     {
       text: "Name",
       value: "name",
-      rowStyles: "cursor-pointer font-semibold text-blue-600",
-      rowCallback: () => {
-        alert("clicked");
-      },
+      rowStyles: () => "cursor-pointer font-semibold text-blue-600",
+      rowClick: (data: IUser) => getUserDetail(data.id),
     },
     { text: "Gender", value: "gender" },
     { text: "Email", value: "email" },
-    { text: "Status", value: "status" },
+    {
+      text: "Status",
+      value: "status",
+      rowStyles: (data: any) => {
+        if (data.status === Status.ACTIVE) {
+          return "px-4 w-[100px] flex justify-center items-center text-center py-1 bg-green-600 text-white rounded-xl shadow-md"
+        } else {
+          return "px-4 w-[100px] flex justify-center items-center text-center py-1 bg-yellow-600 text-white rounded-xl shadow-md"
+        }
+      }
+    },
   ];
 
   return (
     <div className="min-h-screen w-full">
-      <div className="flex justify-between items-center py-6 px-10">
+      <div className="flex justify-between items-center py-6 px-4 md:px-10">
         <h1 className="text-xl">User List</h1>
-        <button className="bg-green-500 px-4 py-2 rounded-md shadow-lg text-white">
+        <button
+          onClick={handleToggleCreateUserModal}
+          className="bg-green-500 px-4 py-2 rounded-md shadow-lg text-white"
+        >
           Tambah User
         </button>
       </div>
-      <div className="w-full py-6 px-10 flex justify-between">
+      <div className="w-full py-6 px-4 md:px-10 flex justify-between">
         <div className="w-full flex-1">
           <input
             onChange={handleInputChange}
@@ -94,12 +237,48 @@ export default function Users() {
       ) : (
         <DataTable dataSource={dataSource} headers={headers} />
       )}
+
       <Pagination
         onPrevPage={() => setParams({ ...params, page: params.page - 1 })}
         onNextPage={() => setParams({ ...params, page: params.page + 1 })}
         currentPage={params.page}
         totalPages={500}
       />
+
+      {/* 
+        TODO: need to refactor
+        Belum use DRY, gk sempet :( 
+        */}
+      <Modal
+        key={"createUser"}
+        headerTitle="Create User"
+        isOpen={createUserModalOpen}
+        onClose={handleToggleCreateUserModal}
+      >
+        <UserForm
+          handleCreateUser={handleCreateUser}
+          setLoading={setUserCreateLoading}
+          loading={userCreateLoading}
+          setCreateUserModalOpen={setCreateUserModalOpen}
+        />
+      </Modal>
+
+      <Modal
+        key={"editUser"}
+        headerTitle="Edit User"
+        isOpen={updateUserModalOpen}
+        onClose={handleToggleUpdateUserModal}
+      >
+        <UserUpdateForm
+          loading={userDetailLoading}
+          setUpdateUserModalOpen={setUpdateUserModalOpen}
+          userDetail={userDetail}
+          handleUpdateUser={handleUpdateUser}
+          handleDeleteUser={handleDeleteUser}
+        />
+      </Modal>
+
+      { toast.ToastPortal() }
     </div>
   );
 }

@@ -4,7 +4,8 @@ import {
   getUserPosts,
   getUserTodos,
   deleteUser, 
-  updateUser
+  updateUser, 
+  getUserDetailById
 } from "./users";
 
 import {
@@ -26,5 +27,6 @@ export {
   getUserPosts, 
   getUserTodos, 
   deleteUser, 
-  updateUser
+  updateUser,
+  getUserDetailById
 };

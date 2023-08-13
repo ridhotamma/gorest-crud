@@ -1,0 +1,37 @@
+/* Toast animations */
+@keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+  
+  /* Apply animations to the toast */
+  .toast {
+    animation: fadeIn 0.3s ease-in-out, fadeOut 0.3s ease-in-out forwards;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  }
+  
+  .toast.active {
+    animation: fadeIn 0.3s ease-in-out;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  

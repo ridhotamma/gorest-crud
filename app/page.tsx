@@ -20,8 +20,14 @@ export default function Home() {
           </li>
           <li>
             <Link href={'/blogs'} className="py-2 px-4 rounded-lg shadow-lg duration-200 bg-green-500 hover:bg-green-600 text-white flex items-center gap-2">
-              <span>Explore Blog CRUD</span>
+              <span>Explore Blogs</span>
               <span className="material-icons">arrow_forward</span>
+            </Link>
+          </li>
+          <li>
+            <Link href={'https://github.com/ridhotamma/gorest-crud'} className="py-2 px-4 rounded-lg shadow-lg duration-200 bg-black hover:bg-gray-500 text-white flex items-center gap-2">
+              <span>Code on github</span>
+              <span className="material-icons">code</span>
             </Link>
           </li>
         </ul>

@@ -2,7 +2,7 @@
 
 import { getPaginatedPosts, getPostDetailById } from "@/lib/actions";
 import { IComment, IParams, IPost } from "@/lib/actions/interfaces";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import DataTable from "@/components/datatable";
 import SkeletonLoader from "@/components/skeletons";
@@ -10,7 +10,7 @@ import Pagination from "@/components/pagination";
 import { useToast } from "@/components/toast";
 import Modal from "@/components/modal";
 import { getPostComments } from "@/lib/actions/posts";
-import Image from "next/image";
+import { IHeader } from "@/components/datatable/interface";
 
 export default function Users() {
   const [dataSource, setDataSource] = useState<IPost[]>([]);
@@ -23,7 +23,7 @@ export default function Users() {
 
   const toast = useToast();
 
-  const getDataSource = async () => {
+  const getDataSource = useCallback(async () => {
     setLoading(true);
     try {
       const response = await getPaginatedPosts(params);
@@ -37,8 +37,8 @@ export default function Users() {
     } finally {
       setLoading(false);
     }
-  };
-
+  }, [params, toast])
+  
   const getPostDetail = async (postId: number) => {
     try {
       setPostDetailLoading(true);
@@ -72,21 +72,22 @@ export default function Users() {
     }
   };
 
-  const headers = [
+   useEffect(() => {
+    getDataSource();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.page]);
+  
+  const headers: IHeader[] = [
     {
       text: "ID",
       value: "id",
-      rowStyles: () => "cursor-pointer font-semibold text-blue-600",
+      rowStyles: () => "min-w-[100px] flex justify-start items-center cursor-pointer font-semibold text-blue-600",
       rowClick: (data: IPost) => getPostDetail(data.id),
     },
-    { text: "User ID", value: "user_id", width: 200 },
-    { text: "Title", value: "title" },
-    { text: "Body", value: "body" },
+    { text: "User ID", value: "user_id", rowStyles: () => "min-w-[100px] flex justify-start items-center" },
+    { text: "Title", value: "title", rowStyles: () => "min-w-[250px] flex justify-start items-center" },
+    { text: "Body", value: "body", rowStyles: () => "min-w-[400px] md:min-w-[200px] flex justify-start items-center" },
   ];
-
-  useEffect(() => {
-    getDataSource();
-  }, [params.page]);
 
   return (
     <div className="min-h-screen w-full">
@@ -133,8 +134,8 @@ export default function Users() {
                   </div>
                   <div>
                     <p className="font-semibold">{comment.name}</p>
+                    <p className="text-sm text-gray-500">{comment.email}</p>
                     <p className="text-gray-600">{comment.body}</p>
-                    <p className="text-gray-500">{comment.email}</p>
                   </div>
                 </div>
               ))

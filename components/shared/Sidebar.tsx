@@ -7,13 +7,13 @@ import { useEffect } from "react";
 
 export default function Sidebar() {
   const { visible, setVisible } = useSidebar();
+  const path = usePathname()
 
   const handleToggleSidebar = () => {
     setVisible((prev) => !prev);
   };
 
   const validateMatchedRoute = (menu: IMenu) => {
-    const path = usePathname()
     return path === menu.path
   }
 

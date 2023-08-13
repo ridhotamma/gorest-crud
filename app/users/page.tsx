@@ -2,7 +2,7 @@
 
 import { getPaginatedUsers, createUser, getUserDetailById, updateUser, deleteUser } from "@/lib/actions";
 import { IParams, IUser, Status } from "@/lib/actions/interfaces";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import DataTable from "@/components/datatable";
 import SkeletonLoader from "@/components/skeletons";
@@ -27,20 +27,25 @@ export default function Users() {
 
   const toast = useToast()
 
-  const getDataSource = async (callback?: () => void) => {
+  const getDataSource = useCallback(async (callback?: () => void) => {
     setLoading(true);
     try {
       const response = await getPaginatedUsers(params);
       const { ok, data } = response;
 
-      if (ok) setDataSource(data as IUser[]);
-    } catch (error) {
-      console.error({ error });
+      if (ok) {
+        setDataSource(data as IUser[]);
+      }
+    } catch (error: any) {
+      toast.trigger({
+        type: 'danger',
+        message: error.message
+      })
     } finally {
       setLoading(false);
       if (callback) callback();
     }
-  };
+  }, [params, toast]);
 
   const getUserDetail = async (id: number) => {
     setUserDetailLoading(true);
@@ -180,6 +185,7 @@ export default function Users() {
 
   useEffect(() => {
     getDataSource();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.page]);
 
   const headers: IHeader[] = [

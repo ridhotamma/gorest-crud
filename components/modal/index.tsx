@@ -33,15 +33,6 @@ const Modal: React.FC<ModalProps> = ({
   headerTitle,
   customHeader: CustomHeader,
 }) => {
-  const handleOverlayClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.target === e.currentTarget) {
-        onClose();
-      }
-    },
-    [onClose]
-  );
-
   const handleEscKey = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -51,25 +42,38 @@ const Modal: React.FC<ModalProps> = ({
     [onClose]
   );
 
+  const handleOverlayClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (e.target === e.currentTarget) {
+        onClose();
+      }
+    },
+    [onClose]
+  );
+
+
   useEffect(() => {
+    // Memoize the handleEscKey function
+    const memoizedHandleEscKey = handleEscKey;
+
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      document.addEventListener("keydown", handleEscKey);
+      document.addEventListener("keydown", memoizedHandleEscKey);
     } else {
       document.body.style.overflow = "auto";
-      document.removeEventListener("keydown", handleEscKey);
+      document.removeEventListener("keydown", memoizedHandleEscKey);
     }
     return () => {
       document.body.style.overflow = "auto";
-      document.removeEventListener("keydown", handleEscKey);
+      document.removeEventListener("keydown", memoizedHandleEscKey);
     };
-  }, [isOpen]);
+  }, [isOpen, handleEscKey]);
 
-  const modalClasses = `fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50 ${
+  const modalClasses = `fixed inset-0 z-[100] p-4 md:p-0 flex items-center justify-center bg-black bg-opacity-50 ${
     isOpen ? "animation-fade-in" : "animation-fade-out"
   }`;
 
-  const contentClasses = `overflow-auto relative bg-white w-[50%] min-h-[100px] max-h-[80%] p-6 rounded-lg shadow-md ${
+  const contentClasses = `overflow-auto relative bg-white w-full md:w-[50%] h-auto md:min-h-[100px] max-h-[80%] p-6 rounded-lg shadow-md ${
     isOpen ? "animation-scale-up" : "animation-scale-down"
   }`;
 

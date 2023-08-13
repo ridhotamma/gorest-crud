@@ -41,13 +41,12 @@ export function useForm(
 
   const validateField = (name: string, value: string) => {
     const fieldRules = validationRules[name];
-    console.log({ fieldRules })
     if (!fieldRules) return;
 
     delete errors[name];
 
     if (fieldRules.rules.includes("required") && formData[name]) {
-      setErrors((prevData) => ({ ...prevData, [name]: "" }));
+      delete errors[name];
     }
      
     if (fieldRules.rules.includes("required") && !value) {
@@ -58,10 +57,7 @@ export function useForm(
     }
     
     if (fieldRules.rules.includes("maxLength") && fieldRules.maxLength && value.length < fieldRules.maxLength) {
-      setErrors((prevData: any) => ({
-        ...prevData,
-        [name]: "",
-      }));
+      delete errors[name];
     }
 
     if (fieldRules.rules.includes("maxLength") && fieldRules.maxLength && value.length > fieldRules.maxLength) {
@@ -76,7 +72,7 @@ export function useForm(
       fieldRules.pattern &&
       fieldRules.pattern.test(value)
     ) {
-      setErrors((prevData: any) => ({ ...prevData, [name]: "" }));
+      delete errors[name];
     }
 
    if (
@@ -86,6 +82,8 @@ export function useForm(
     ) {
       setErrors((prevData: any) => ({ ...prevData, [name]: "Invalid format" }));
     }
+
+    console.log({ errors })
   };
 
   const handleSubmit = (e: FormEvent) => {

@@ -203,9 +203,9 @@ export default function Users() {
       value: "status",
       rowStyles: (data: any) => {
         if (data.status === Status.ACTIVE) {
-          return "px-4 w-[100px] flex justify-center items-center text-center py-1 bg-green-600 text-white rounded-xl shadow-md"
+          return "px-4 w-[100px] flex justify-center items-center text-center py-1 bg-blue-500 text-white rounded-xl shadow-md"
         } else {
-          return "px-4 w-[100px] flex justify-center items-center text-center py-1 bg-yellow-600 text-white rounded-xl shadow-md"
+          return "px-4 w-[100px] flex justify-center items-center text-center py-1 bg-red-500 text-white rounded-xl shadow-md"
         }
       }
     },
@@ -214,12 +214,12 @@ export default function Users() {
   return (
     <div className="min-h-screen w-full">
       <div className="flex justify-between items-center py-6 px-4 md:px-10">
-        <h1 className="text-xl">User List</h1>
+        <h1 className="text-xl font-bold">User List</h1>
         <button
           onClick={handleToggleCreateUserModal}
           className="bg-green-500 px-4 py-2 rounded-md shadow-lg text-white"
         >
-          Tambah User
+          Add User
         </button>
       </div>
       <div className="w-full py-6 px-4 md:px-10 flex justify-between">

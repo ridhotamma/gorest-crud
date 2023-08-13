@@ -92,7 +92,7 @@ export default function Users() {
   return (
     <div className="min-h-screen w-full">
       <div className="flex justify-between items-center py-6 px-10">
-        <h1 className="text-xl">Post List</h1>
+        <h1 className="text-xl font-bold">Post List</h1>
       </div>
 
       <hr />

@@ -29,7 +29,7 @@ const useToast = () => {
   return {
     trigger: triggerToast,
     ToastPortal: () => (
-      <div className="fixed z-[1001] top-0 left-0 w-full h-full pointer-events-none">
+      <div className="fixed z-[1001] inset-0 top-0 left-0 w-full h-full pointer-events-none">
         {toasts.map((toast, index) => (
           <Toast
             key={index}

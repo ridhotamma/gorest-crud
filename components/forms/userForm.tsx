@@ -166,7 +166,6 @@ export default function UserForm({
           )}
         </div>
         <div className="w-full text-center">
-          <p>{JSON.stringify(errors)}</p>
           <button
             disabled={Object.keys(errors).length !== 0}
             className={`${

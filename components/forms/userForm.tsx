@@ -36,7 +36,7 @@ export default function UserForm({
       pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
     },
     gender: { rules: ["required"] },
-    active: { rules: ["required"] },
+    status: { rules: ["required"] },
   };
 
   const { handleSubmit, handleChange, formData, errors } = useForm(

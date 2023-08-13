@@ -75,6 +75,7 @@ export default function Users() {
 
       if (ok) {
         setDataSource(prevDataSource => [data as any, ...prevDataSource]);
+        handleToggleCreateUserModal()
         toast.trigger({
           type: 'success',
           message: 'User Created Succesfully'
@@ -88,7 +89,6 @@ export default function Users() {
       })
     } finally {
       setUserCreateLoading(false)
-      handleToggleCreateUserModal()
     }
   }
 

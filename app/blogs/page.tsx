@@ -1,25 +1,30 @@
 "use client";
 
 import { getPaginatedPosts, getPostDetailById } from "@/lib/actions";
-import { IParams, IPost } from "@/lib/actions/interfaces";
+import { IComment, IParams, IPost } from "@/lib/actions/interfaces";
 import { useEffect, useState } from "react";
 
 import DataTable from "@/components/datatable";
 import SkeletonLoader from "@/components/skeletons";
 import Pagination from "@/components/pagination";
 import { useToast } from "@/components/toast";
+import Modal from "@/components/modal";
+import { getPostComments } from "@/lib/actions/posts";
+import Image from "next/image";
 
 export default function Users() {
   const [dataSource, setDataSource] = useState<IPost[]>([]);
-  const [postDetail, setPostDetail] = useState<Partial<IPost>>({})
+  const [postDetail, setPostDetail] = useState<Partial<IPost>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [postDetailLoading, setPostDetailLoading] = useState<boolean>(true);
   const [params, setParams] = useState<IParams>({ per_page: 10, page: 1 });
+  const [postDetailModalOpen, setPostDetailModalOpen] =
+    useState<boolean>(false);
 
   const toast = useToast();
 
   const getDataSource = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await getPaginatedPosts(params);
       const { ok, data } = response;
@@ -35,22 +40,37 @@ export default function Users() {
   };
 
   const getPostDetail = async (postId: number) => {
-    setPostDetailLoading(true)
     try {
-      const response = await getPostDetailById(postId)
-      const {ok, data} = response
+      setPostDetailLoading(true);
 
-      if (ok) setPostDetail(data as IPost)
+      const [postResponse, commentResponse] = await Promise.all([
+        getPostDetailById(postId),
+        getPostComments(postId),
+      ]);
 
+      const { ok: postOk, data: postData } = postResponse;
+      const { ok: commentOk, data: commentData } = commentResponse;
+
+      if (postOk) {
+        setPostDetail(postData as IPost);
+        setPostDetailModalOpen(true);
+      }
+
+      if (commentOk) {
+        setPostDetail((prevPostDetail) => ({
+          ...prevPostDetail,
+          comments: commentData as IComment[],
+        }));
+      }
     } catch (error: any) {
       toast.trigger({
-        type: 'danger',
-        message: error.message
-      })
+        type: "danger",
+        message: error.message,
+      });
     } finally {
-      setPostDetailLoading(false)
+      setPostDetailLoading(false);
     }
-  }
+  };
 
   const headers = [
     {
@@ -88,6 +108,42 @@ export default function Users() {
         currentPage={params.page}
         totalPages={500}
       />
+
+      <Modal
+        headerTitle="Post Detail"
+        isOpen={postDetailModalOpen}
+        onClose={() => setPostDetailModalOpen((prev: boolean) => !prev)}
+      >
+        <div className="px-2 py-6">
+          <h1 className="text-2xl font-bold mb-2">{postDetail.title}</h1>
+          <p className="text-gray-600 mb-4">{postDetail.body}</p>
+          <p className="text-gray-600 mb-4">
+            Posted by user ID: {postDetail.user_id}
+          </p>
+
+          <div className="border-t pt-4 overflow-auto max-h-[250px]">
+            <h2 className="text-xl font-bold mb-2">Post Comments</h2>
+            {postDetail.comments?.length ? (
+              postDetail.comments.map((comment, index) => (
+                <div key={index} className="flex items-start my-4">
+                  <div className="mr-4">
+                    <span className="h-10 w-10 rounded-full bg-slate-600 flex items-center justify-center text-white">
+                      {comment.email.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-semibold">{comment.name}</p>
+                    <p className="text-gray-600">{comment.body}</p>
+                    <p className="text-gray-500">{comment.email}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">No comments available</p>
+            )}
+          </div>
+        </div>
+      </Modal>
 
       {toast.ToastPortal()}
     </div>

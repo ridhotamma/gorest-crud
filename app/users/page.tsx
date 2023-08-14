@@ -203,9 +203,9 @@ export default function Users() {
       value: "status",
       rowStyles: (data: any) => {
         if (data.status === Status.ACTIVE) {
-          return "px-4 w-[100px] flex justify-center items-center text-center py-1 bg-blue-500 text-white rounded-xl shadow-md"
+          return "px-4 w-[100px] flex justify-center items-center text-center py-1 border-2 border-green-500 text-green-500 font-semibold rounded-xl shadow-md"
         } else {
-          return "px-4 w-[100px] flex justify-center items-center text-center py-1 bg-red-500 text-white rounded-xl shadow-md"
+          return "px-4 w-[100px] flex justify-center items-center text-center py-1 border-2 border-orange-500 text-orange-500 font-semibold rounded-xl shadow-md"
         }
       }
     },
